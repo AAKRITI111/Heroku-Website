@@ -3,62 +3,61 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-class Todo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PCTasks(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    task = db.Column(db.String(200),nullable=False)
+    desc = db.Column(db.String(600),nullable=True)
+    date = db.Column(db.DateTime,default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Task %r>' % self.id
+        return f"{self.task} - {self.desc}"
 
+
+ 
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    if request.method == 'POST':
-        task_content = request.form['content']
-        new_task = Todo(content=task_content)
+    if request.method=='POST':
+      pctask=request.form['task']
+      pcdesc=request.form['desc']
+      pictask = PCTasks(task=pctask,desc=pcdesc)
+      db.session.add(pictask)
+      db.session.commit()
+    allTasks = PCTasks.query.all()
+    return render_template("index.html", allTasks=allTasks)
 
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'There was an issue adding your risk'
+    # return render_template("index.html")
+    
+@app.route('/update/<int:id>')
+def update(id):
+    print(id)
+    udTask = PCTasks.query.filter_by(id=id).first()
+    db.session.delete(udTask)
+    db.session.commit()
 
-    else:
-        tasks = Todo.query.order_by(Todo.date_created).all()
-        return render_template('index.html', tasks=tasks)
+    # ptask=request.form['task']
+    # pdesc=request.form['desc']
+    # pictask = PCTasks(task=ptask,desc=pdesc)
+    # db.session.add(pictask)
+    # db.session.commit()
 
+    # print(allTasks)
+    # allTasks = PCTasks.query.all()
+    return render_template("update.html")
 
 @app.route('/delete/<int:id>')
 def delete(id):
-    task_to_delete = Todo.query.get_or_404(id)
-
-    try:
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:
-        return 'There was a problem deleting that risk'
-
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-def update(id):
-    task = Todo.query.get_or_404(id)
-
-    if request.method == 'POST':
-        task.content = request.form['content']
-
-        try:
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'There was an issue updating your risk'
-
-    else:
-        return render_template('update.html', task=task)
+    delTasks = PCTasks.query.filter_by(id=id).first()
+    db.session.delete(delTasks)
+    db.session.commit()
+    # print(allTasks)
+    # allTasks = PCTasks.query.all()
+    return redirect("/")
 
 
 if __name__ == "__main__":
