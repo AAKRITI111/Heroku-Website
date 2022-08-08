@@ -17,9 +17,6 @@ class PCTasks(db.Model):
     def __repr__(self):
         return f"{self.task} - {self.desc}"
 
-
- 
-
 @app.route('/', methods=['POST', 'GET'])
 def index():
     if request.method=='POST':
@@ -35,7 +32,6 @@ def index():
     
 @app.route('/update/<int:id>')
 def update(id):
-    print(id)
     udTask = PCTasks.query.filter_by(id=id).first()
     db.session.delete(udTask)
     db.session.commit()
@@ -59,6 +55,9 @@ def delete(id):
     # allTasks = PCTasks.query.all()
     return redirect("/")
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
