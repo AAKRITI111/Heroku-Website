@@ -25,7 +25,7 @@ def login():
    username = request.form['username']
    password = request.form['password']
    if username in ['Picy','Pica'] and password == "wontgooffice":
-    session["user"]=password
+    session["user"]=username
     return redirect(url_for("home"))
    else:
     return render_template("login.html")
@@ -49,6 +49,7 @@ def add():
       pcdesc=request.form['desc']
       pcassign=request.form['assigned']
       pcuserlogged=session['user']
+      print("asby",pcuserlogged)
       pictask = PCTasks(task=pctask,desc=pcdesc,assigned=pcassign,userlogged=pcuserlogged)
       db.session.add(pictask)
       db.session.commit()
