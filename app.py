@@ -24,7 +24,7 @@ def login():
   if request.method == 'POST':
    username = request.form['username']
    password = request.form['password']
-   if username in ['Picy','Pica'] and password == "wontgooffice":
+   if username in ['Picy','Pica'] and password == "iamsorry":
     session["user"]=username
     return redirect(url_for("home"))
    else:
